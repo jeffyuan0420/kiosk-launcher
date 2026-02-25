@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Solutions Hub</title>
+    
+    <!-- 1. 引入 Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 2. 引入 Babel (讓瀏覽器看得懂 JSX) -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- 預載入字型 (選用) -->
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+        
+        /* 隱藏捲軸但保持功能 (Kiosk 常見設定) */
+        ::-webkit-scrollbar {
+            width: 0px;
+            background: transparent;
+        }
+    </style>
+</head>
+<body class="bg-[#0f111a] text-white overflow-hidden">
+    
+    <!-- React 掛載點 -->
+    <div id="root"></div>
+
+    <!-- 3. React 應用程式邏輯 -->
+    <script type="text/babel" data-type="module">
+        import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
+        import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client?deps=react@18.2.0';
+        import { motion, AnimatePresence } from 'https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0,react-dom@18.2.0';
+        // 引入 Icon (新增 Utensils 和 Smartphone 用於餐飲系統)
+        import { 
+            Luggage, 
+            CalendarClock, 
+            Stethoscope, 
+            ChevronRight, 
+            Zap, 
+            Building2, 
+            Activity, 
+            X, 
+            Home, 
+            Globe,
+            LogOut,
+            Wifi,
+            WifiOff,
+            Utensils,     // [新增] 餐飲 Icon
+            Smartphone    // [新增] 手機/點餐 Icon
+        } from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
+
+        // --- 多語系資料結構定義 ---
+        const uiTranslations = {
+            en: {
+                mainTitle: 'Interactive Solution Demo',
+                status: 'System Online • Ready for interaction',
+                statusOffline: 'System Offline • Local Mode',
+                startDemo: 'Start Demo',
+                footerHint: 'Touch a scenario to start experience',
+                backHome: 'Exit Demo',
+                dragHint: 'Drag to move',
+                loading: 'Loading...',
+                networkLost: 'Network connection lost',
+                networkRestored: 'Network connection restored'
+            },
+            zh: {
+                mainTitle: '智慧場景解決方案展示',
+                status: '系統連線正常 • 隨時準備互動',
+                statusOffline: '系統離線 • 本地模式執行中',
+                startDemo: '開始體驗',
+                footerHint: '請點擊任一場景開始體驗',
+                backHome: '結束體驗',
+                dragHint: '可拖曳移動',
+                loading: '載入中...',
+                networkLost: '網路連線中斷，請檢查連線',
+                networkRestored: '網路連線已恢復'
+            },
+            es: {
+                mainTitle: 'Demostración de Soluciones',
+                status: 'Sistema en línea • Listo para interactuar',
+                statusOffline: 'Sistema fuera de línea • Modo local',
+                startDemo: 'Iniciar Demo',
+                footerHint: 'Toque un escenario para comenzar',
+                backHome: 'Salir',
+                dragHint: 'Arrastrar',
+                loading: 'Cargando...',
+                networkLost: 'Conexión de red perdida',
+                networkRestored: 'Conexión de red restaurada'
+            }
+        };
+
+        const solutions = [
+            {
+                id: 'hospitality',
+                title: {
+                    en: 'Hotel Self-Check-in',
+                    zh: '飯店自助入住系統',
+                    es: 'Check-in de Hotel'
+                },
+                subtitle: {
+                    en: 'Smart ID scanning & Keyless entry',
+                    zh: '智慧證件掃描與無卡門禁應用',
+                    es: 'Escaneo de ID y entrada sin llave'
+                },
+                icon: Luggage,
+                secondaryIcon: Building2,
+                url: 'https://venerable-sorbet-a48e34.netlify.app/',
+                theme: {
+                    primary: 'text-cyan-400',
+                    border: 'border-cyan-400/30',
+                    glow: 'shadow-cyan-400/20',
+                    hoverGlow: 'hover:shadow-cyan-400/60',
+                    bgGradient: 'from-cyan-500/10 to-teal-500/5',
+                    iconBg: 'bg-cyan-400/20',
+                    buttonBg: 'bg-cyan-600'
+                }
+            },
+            {
+                id: 'corporate',
+                title: {
+                    en: 'Meeting Room Scheduler',
+                    zh: '會議室預約管理',
+                    es: 'Gestión de Salas'
+                },
+                subtitle: {
+                    en: 'Room booking & Status display',
+                    zh: '即時預訂與使用狀態顯示看板',
+                    es: 'Reserva de salas y estado actual'
+                },
+                icon: CalendarClock,
+                secondaryIcon: Zap,
+                url: 'https://glowing-truffle-ca1707.netlify.app/',
+                theme: {
+                    primary: 'text-orange-400',
+                    border: 'border-orange-400/30',
+                    glow: 'shadow-orange-400/20',
+                    hoverGlow: 'hover:shadow-orange-400/60',
+                    bgGradient: 'from-orange-500/10 to-amber-500/5',
+                    iconBg: 'bg-orange-400/20',
+                    buttonBg: 'bg-orange-600'
+                }
+            },
+            {
+                id: 'healthcare',
+                title: {
+                    en: 'Smart Healthcare',
+                    zh: '智慧醫療報到系統',
+                    es: 'Atención Médica Inteligente'
+                },
+                subtitle: {
+                    en: 'Self Check-in & Queue Management',
+                    zh: '自助報到與叫號管理',
+                    es: 'Auto-registro y Gestión de Colas'
+                },
+                icon: Stethoscope,
+                secondaryIcon: Activity,
+                url: 'https://incredible-cendol-7dc7d8.netlify.app/',
+                theme: {
+                    primary: 'text-emerald-400',
+                    border: 'border-emerald-400/30',
+                    glow: 'shadow-emerald-400/20',
+                    hoverGlow: 'hover:shadow-emerald-400/60',
+                    bgGradient: 'from-emerald-500/10 to-teal-500/5',
+                    iconBg: 'bg-emerald-400/20',
+                    buttonBg: 'bg-emerald-600'
+                }
+            },
+            // [新增] 第 4 個場景：智慧點餐系統
+            {
+                id: 'ordering',
+                title: {
+                    en: 'Smart Ordering System',
+                    zh: '智慧點餐系統',
+                    es: 'Sistema de Pedidos'
+                },
+                subtitle: {
+                    en: 'Self-service ordering & mobile payment',
+                    zh: '無人化自助點餐與行動支付應用',
+                    es: 'Autoservicio de pedidos y pago móvil'
+                },
+                icon: Utensils,
+                secondaryIcon: Smartphone,
+                url: 'https://jeffyuan0420.github.io/ordering-system/',
+                theme: {
+                    // 使用 Rose (玫瑰紅/粉紅) 色系代表餐飲
+                    primary: 'text-rose-400',
+                    border: 'border-rose-400/30',
+                    glow: 'shadow-rose-400/20',
+                    hoverGlow: 'hover:shadow-rose-400/60',
+                    bgGradient: 'from-rose-500/10 to-pink-500/5',
+                    iconBg: 'bg-rose-400/20',
+                    buttonBg: 'bg-rose-600'
+                }
+            }
+        ];
+
+        // 動畫設定
+        const containerVariants = {
+            hidden: { opacity: 0 },
+            visible: {
+                opacity: 1,
+                transition: { staggerChildren: 0.15, delayChildren: 0.2 }
+            }
+        };
+
+        const cardVariants = {
+            hidden: { opacity: 0, y: 40 },
+            visible: { 
+                opacity: 1, 
+                y: 0,
+                transition: { type: 'spring', stiffness: 100, damping: 15 }
+            }
+        };
+
+        const overlayVariants = {
+            hidden: { opacity: 0, scale: 0.95 },
+            visible: { opacity: 1, scale: 1, transition: { duration: 0.4, ease: "easeOut" } },
+            exit: { opacity: 0, scale: 0.95, transition: { duration: 0.3 } }
+        };
+
+        const App = () => {
+            const [currentTime, setCurrentTime] = useState(new Date());
+            const [activeDemo, setActiveDemo] = useState(null);
+            
+            // [關鍵修改] 預設語言改回中文 ('zh')
+            const [lang, setLang] = useState('zh'); 
+            
+            const constraintsRef = useRef(null);
+            const [isOnline, setIsOnline] = useState(navigator.onLine);
+            const [showNetworkToast, setShowNetworkToast] = useState(false);
+
+            useEffect(() => {
+                const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+                
+                const handleOnline = () => {
+                    setIsOnline(true);
+                    setShowNetworkToast(true);
+                    setTimeout(() => setShowNetworkToast(false), 3000);
+                };
+                const handleOffline = () => {
+                    setIsOnline(false);
+                    setShowNetworkToast(true);
+                    setTimeout(() => setShowNetworkToast(false), 5000);
+                };
+
+                window.addEventListener('online', handleOnline);
+                window.addEventListener('offline', handleOffline);
+
+                return () => {
+                    clearInterval(timer);
+                    window.removeEventListener('online', handleOnline);
+                    window.removeEventListener('offline', handleOffline);
+                };
+            }, []);
+
+            const handleNavigation = (solution) => {
+                setActiveDemo(solution);
+            };
+
+            const handleClose = () => {
+                setActiveDemo(null);
+            };
+
+            const LangButton = ({ code, label }) => (
+                <button
+                    onClick={(e) => { e.stopPropagation(); setLang(code); }}
+                    className={`
+                        px-3 py-1 rounded-md text-sm font-medium transition-all duration-200
+                        ${lang === code 
+                            ? 'bg-white text-black shadow-lg scale-105' 
+                            : 'text-slate-400 hover:text-white hover:bg-white/10'}
+                    `}
+                >
+                    {label}
+                </button>
+            );
+
+            return (
+                <div className="relative w-full h-screen overflow-hidden bg-[#0f111a] text-white font-sans selection:bg-white/20">
+                    
+                    {/* --- 背景裝飾 --- */}
+                    <div className="absolute inset-0 z-0">
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#80808012_1px,transparent_1px),linear-gradient(to_bottom,#80808012_1px,transparent_1px)] bg-[size:40px_40px]"></div>
+                        <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[80vw] h-[30vh] bg-blue-500/20 blur-[120px] rounded-full mix-blend-screen"></div>
+                        <div className="absolute bottom-0 left-0 w-[40vw] h-[40vh] bg-purple-900/20 blur-[100px] rounded-full"></div>
+                        <div className="absolute bottom-0 right-0 w-[40vw] h-[40vh] bg-cyan-900/20 blur-[100px] rounded-full"></div>
+                    </div>
+
+                    <AnimatePresence>
+                        {showNetworkToast && (
+                            <motion.div
+                                initial={{ opacity: 0, y: -50 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                exit={{ opacity: 0, y: -50 }}
+                                className={`fixed top-4 left-1/2 -translate-x-1/2 z-[100] px-6 py-3 rounded-full flex items-center gap-3 shadow-2xl border ${isOnline ? 'bg-green-500/20 border-green-500 text-green-400' : 'bg-red-500/20 border-red-500 text-red-400'} backdrop-blur-md`}
+                            >
+                                {isOnline ? <Wifi size={20} /> : <WifiOff size={20} />}
+                                <span className="font-medium">
+                                    {isOnline ? uiTranslations[lang].networkRestored : uiTranslations[lang].networkLost}
+                                </span>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+
+                    {/* --- Launcher Interface --- */}
+                    <div className={`relative z-10 flex flex-col h-full p-8 lg:p-12 max-w-[1920px] mx-auto transition-all duration-500 ${activeDemo ? 'blur-sm scale-95 opacity-50 pointer-events-none' : 'blur-0 scale-100 opacity-100'}`}>
+                        
+                        {/* Header */}
+                        <motion.header 
+                            initial={{ opacity: 0, y: -20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.8 }}
+                            className="flex justify-between items-end mb-10 border-b border-white/10 pb-6"
+                        >
+                            <div className="flex items-start gap-6">
+                                <div className="bg-white/10 p-2 rounded-xl backdrop-blur-md border border-white/10 shadow-lg">
+                                    <img 
+                                        src="./logo.png" 
+                                        alt="Company Logo" 
+                                        className="h-16 w-16 object-contain"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.parentNode.innerHTML = '<span class="text-xs text-white/50 w-16 h-16 flex items-center justify-center">Logo</span>';
+                                        }}
+                                    />
+                                </div>
+
+                                <div>
+                                    <h1 className="text-4xl lg:text-5xl font-bold tracking-tight text-white mb-2">
+                                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-indigo-300">
+                                            {lang === 'en' ? 'Interactive' : (lang === 'zh' ? '智慧場景' : 'Interactivo')}
+                                        </span> {lang === 'en' ? 'Solution Demo' : (lang === 'zh' ? '解決方案展示' : 'Demo')}
+                                    </h1>
+                                    <p className="text-lg lg:text-xl text-slate-400 font-light flex items-center gap-2">
+                                        <span className={`w-2 h-2 rounded-full ${isOnline ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></span>
+                                        {isOnline ? uiTranslations[lang].status : uiTranslations[lang].statusOffline}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="flex flex-col items-end gap-3">
+                                <div className="text-3xl lg:text-4xl font-mono font-medium text-slate-200">
+                                    {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </div>
+                                <div className="flex items-center gap-4">
+                                    <div className="text-slate-500 uppercase tracking-widest text-sm border-r border-white/10 pr-4">
+                                        {currentTime.toLocaleDateString()}
+                                    </div>
+                                    <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1 border border-white/10">
+                                        <Globe size={14} className="ml-2 mr-1 text-slate-400" />
+                                        <LangButton code="zh" label="繁中" />
+                                        <LangButton code="en" label="EN" />
+                                        <LangButton code="es" label="ES" />
+                                    </div>
+                                </div>
+                            </div>
+                        </motion.header>
+
+                        {/* [更新] 配合 4 個場景，改用 md:grid-cols-2 lg:grid-cols-4 以確保完美並排 */}
+                        <motion.div 
+                            variants={containerVariants}
+                            initial="hidden"
+                            animate="visible"
+                            className="flex-1 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 xl:gap-8 items-stretch pb-10"
+                        >
+                            {solutions.map((card) => {
+                                const IconComponent = card.icon;
+                                const SecondaryIconComponent = card.secondaryIcon;
+                                return (
+                                    <motion.div
+                                        key={card.id}
+                                        variants={cardVariants}
+                                        whileHover={{ scale: 1.02 }}
+                                        whileTap={{ scale: 0.98 }}
+                                        onClick={() => handleNavigation(card)}
+                                        className={`
+                                            group relative cursor-pointer
+                                            flex flex-col justify-between
+                                            rounded-[2rem] border border-white/10
+                                            backdrop-blur-xl bg-gradient-to-br ${card.theme.bgGradient}
+                                            shadow-2xl transition-all duration-300 ease-out
+                                            ${card.theme.hoverGlow} ${card.theme.border}
+                                            hover:border-opacity-80 hover:bg-opacity-20
+                                        `}
+                                    >
+                                        <div className={`absolute -top-20 -right-20 w-48 h-48 bg-gradient-to-br from-white/5 to-transparent rounded-full blur-3xl group-hover:bg-${card.theme.primary.split('-')[1]}-500/20 transition-all duration-500`}></div>
+                                        <div className="p-8 lg:p-10 flex flex-col h-full relative z-20">
+                                            <div className="flex justify-between items-start mb-auto">
+                                                <div className={`
+                                                    w-20 h-20 rounded-2xl flex items-center justify-center
+                                                    backdrop-blur-md border border-white/10
+                                                    ${card.theme.iconBg} ${card.theme.primary}
+                                                    shadow-inner
+                                                `}>
+                                                    <IconComponent size={40} strokeWidth={1.5} />
+                                                </div>
+                                                <div className={`p-3 rounded-full bg-white/5 text-white/40 group-hover:text-white transition-colors`}>
+                                                    <SecondaryIconComponent size={20} />
+                                                </div>
+                                            </div>
+                                            <div className="mt-10 space-y-3">
+                                                <h2 className="text-3xl lg:text-4xl font-bold text-white leading-tight group-hover:translate-x-1 transition-transform duration-300">
+                                                    {card.title[lang]}
+                                                </h2>
+                                                <p className="text-lg lg:text-xl text-slate-300 font-light leading-relaxed border-l-2 border-white/10 pl-4">
+                                                    {card.subtitle[lang]}
+                                                </p>
+                                            </div>
+                                            <div className="mt-10 flex items-center gap-3 text-lg font-medium opacity-60 group-hover:opacity-100 transition-opacity">
+                                                <span className={`${card.theme.primary}`}>{uiTranslations[lang].startDemo}</span>
+                                                <div className={`p-1 rounded-full ${card.theme.primary} border border-current`}>
+                                                    <ChevronRight size={16} strokeWidth={3} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className={`absolute bottom-0 left-0 right-0 h-1 bg-gradient-to-r from-transparent via-${card.theme.primary.split('-')[1]}-400 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-b-[2rem]`}></div>
+                                    </motion.div>
+                                );
+                            })}
+                        </motion.div>
+
+                        {/* Footer */}
+                        <motion.footer 
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            transition={{ delay: 1.5, duration: 1 }}
+                            className="text-center py-4 relative z-10"
+                        >
+                            <p className="text-xl text-slate-400 font-light tracking-wide flex justify-center items-center gap-3">
+                                <span className="animate-bounce">👆</span> 
+                                {uiTranslations[lang].footerHint}
+                            </p>
+                        </motion.footer>
+                    </div>
+
+                    <AnimatePresence>
+                        {activeDemo && (
+                            <motion.div
+                                ref={constraintsRef}
+                                variants={overlayVariants}
+                                initial="hidden"
+                                animate="visible"
+                                exit="exit"
+                                className="absolute inset-0 z-50 bg-[#0f111a]"
+                            >
+                                <motion.div 
+                                    drag
+                                    dragConstraints={constraintsRef}
+                                    dragMomentum={false}
+                                    whileDrag={{ scale: 1.1 }}
+                                    className="absolute top-4 right-6 z-[60] cursor-move"
+                                >
+                                    <button 
+                                        onClick={handleClose}
+                                        className={`
+                                            group
+                                            flex items-center gap-0 hover:gap-3
+                                            pl-3 pr-3 py-3
+                                            rounded-full 
+                                            bg-black/40 backdrop-blur-md border border-white/10
+                                            hover:bg-${activeDemo.theme.primary.split('-')[1]}-600 
+                                            hover:border-white/30
+                                            text-white
+                                            shadow-[0_8px_32px_rgba(0,0,0,0.3)] 
+                                            transition-all duration-300 ease-out
+                                            hover:pr-6 hover:shadow-${activeDemo.theme.primary.split('-')[1]}-500/50
+                                        `}
+                                        title={uiTranslations[lang].dragHint}
+                                    >
+                                        <div className="bg-white/10 p-1.5 rounded-full group-hover:bg-transparent transition-colors">
+                                            <LogOut size={20} className="stroke-[2.5]" />
+                                        </div>
+                                        <span className="max-w-0 overflow-hidden group-hover:max-w-xs whitespace-nowrap font-bold text-sm tracking-wide transition-all duration-300 opacity-0 group-hover:opacity-100">
+                                            {uiTranslations[lang].backHome}
+                                        </span>
+                                    </button>
+                                </motion.div>
+
+                                <iframe
+                                    src={activeDemo.url}
+                                    title={activeDemo.title[lang]}
+                                    className="w-full h-full border-none bg-white"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                ></iframe>
+                            </motion.div>
+                        )}
+                    </AnimatePresence>
+                </div>
+            );
+        };
+
+        const root = createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
