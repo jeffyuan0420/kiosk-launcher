@@ -33,7 +33,7 @@
         import React, { useState, useEffect, useRef } from 'https://esm.sh/react@18.2.0';
         import { createRoot } from 'https://esm.sh/react-dom@18.2.0/client?deps=react@18.2.0';
         import { motion, AnimatePresence } from 'https://esm.sh/framer-motion@10.16.4?deps=react@18.2.0,react-dom@18.2.0';
-        // 引入 Icon (新增 Utensils 和 Smartphone 用於餐飲系統)
+        // 引入 Icon
         import { 
             Luggage, 
             CalendarClock, 
@@ -48,8 +48,8 @@
             LogOut,
             Wifi,
             WifiOff,
-            Utensils,     // [新增] 餐飲 Icon
-            Smartphone    // [新增] 手機/點餐 Icon
+            Utensils,
+            Smartphone
         } from 'https://esm.sh/lucide-react@0.292.0?deps=react@18.2.0,react-dom@18.2.0';
 
         // --- 多語系資料結構定義 ---
@@ -107,7 +107,8 @@
                 },
                 icon: Luggage,
                 secondaryIcon: Building2,
-                url: 'https://venerable-sorbet-a48e34.netlify.app/',
+                // [更新] 飯店新網址
+                url: 'https://jeffyuan0420.github.io/hotelcheckin/',
                 theme: {
                     primary: 'text-cyan-400',
                     border: 'border-cyan-400/30',
@@ -132,7 +133,8 @@
                 },
                 icon: CalendarClock,
                 secondaryIcon: Zap,
-                url: 'https://glowing-truffle-ca1707.netlify.app/',
+                // [更新] 會議室新網址
+                url: 'https://jeffyuan0420.github.io/smartmeeting/',
                 theme: {
                     primary: 'text-orange-400',
                     border: 'border-orange-400/30',
@@ -157,7 +159,8 @@
                 },
                 icon: Stethoscope,
                 secondaryIcon: Activity,
-                url: 'https://incredible-cendol-7dc7d8.netlify.app/',
+                // [更新] 醫院新網址
+                url: 'https://jeffyuan0420.github.io/hospitalcheckin/',
                 theme: {
                     primary: 'text-emerald-400',
                     border: 'border-emerald-400/30',
@@ -168,7 +171,6 @@
                     buttonBg: 'bg-emerald-600'
                 }
             },
-            // [新增] 第 4 個場景：智慧點餐系統
             {
                 id: 'ordering',
                 title: {
@@ -183,9 +185,9 @@
                 },
                 icon: Utensils,
                 secondaryIcon: Smartphone,
+                // 點餐系統網址維持不變
                 url: 'https://jeffyuan0420.github.io/ordering-system/',
                 theme: {
-                    // 使用 Rose (玫瑰紅/粉紅) 色系代表餐飲
                     primary: 'text-rose-400',
                     border: 'border-rose-400/30',
                     glow: 'shadow-rose-400/20',
@@ -225,7 +227,7 @@
             const [currentTime, setCurrentTime] = useState(new Date());
             const [activeDemo, setActiveDemo] = useState(null);
             
-            // [關鍵修改] 預設語言改回中文 ('zh')
+            // 預設語言為中文 ('zh')
             const [lang, setLang] = useState('zh'); 
             
             const constraintsRef = useRef(null);
@@ -359,7 +361,7 @@
                             </div>
                         </motion.header>
 
-                        {/* [更新] 配合 4 個場景，改用 md:grid-cols-2 lg:grid-cols-4 以確保完美並排 */}
+                        {/* Cards Grid */}
                         <motion.div 
                             variants={containerVariants}
                             initial="hidden"
